@@ -1,0 +1,15 @@
+.container {
+  position: sticky;
+  height: 60px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: #211f5c;
+}
+
+.theme {
+  background-color: black;
+  border-radius: 0.4rem;
+  margin: 0.8rem;
+  padding: 0.3rem 0.55rem;
+}

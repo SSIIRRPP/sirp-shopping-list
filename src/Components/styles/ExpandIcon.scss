@@ -1,0 +1,9 @@
+.ExpandIcon {
+  &.open {
+    transform: rotate(-180deg);
+  }
+  &.closed {
+    animation-name: closed-expand-icon;
+  }
+  transition: transform 0.4s ease-in-out;
+}

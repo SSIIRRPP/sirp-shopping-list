@@ -1,0 +1,19 @@
+// light
+$--color: #343a6e;
+$--color2: #dcd6f7ff;
+$--color3: #a6b1e1ff;
+$--color4: #cacfd6ff;
+$--color5: #d6e5e3ff;
+
+// dark
+$--color: #13293d;
+$--color2: #16324f;
+$--color3: #18435a;
+$--color4: #2a628f;
+$--color5: #72a7cc;
+
+.toggle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
