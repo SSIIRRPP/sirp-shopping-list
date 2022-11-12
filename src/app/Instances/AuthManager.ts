@@ -20,7 +20,7 @@ import Manager from './Manager';
 import UserInstance from './UserInstance';
 
 const CookieStorageConfig: ICookieStorageData = {
-  domain: 'shop.jorgemananes.com',
+  domain: 'list.jorgemananes.com',
   sameSite: 'strict',
   expires: 30,
 };
