@@ -59,9 +59,11 @@ const ListComponentShopping = ({ list }: ListComponentProps) => {
         className="ListComponent shopping"
         style={{
           backgroundColor: theme.backgroundSecondary,
-          borderColor: theme.backgroundSecondary,
+          border:
+            items.length <= 0
+              ? '0px'
+              : `2px solid ${theme.backgroundSecondary}`,
           padding: items.length <= 0 ? '0px' : undefined,
-          border: items.length <= 0 ? '0px' : undefined,
           margin: items.length <= 0 ? '0px' : undefined,
         }}
       >
