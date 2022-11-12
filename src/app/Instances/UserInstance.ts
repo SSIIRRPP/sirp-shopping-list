@@ -5,7 +5,6 @@ import {
   CognitoRefreshToken,
   CognitoUser,
   CognitoUserSession,
-  ICognitoUserData,
 } from 'amazon-cognito-identity-js';
 import { User } from '../../features/auth/authSlice';
 
@@ -19,10 +18,6 @@ class UserInstance extends CognitoUser {
   private UserSession: CognitoUserSession | null = null;
   private UserAttributes: User | null = null;
   private tokens: Tokens | null = null;
-
-  constructor(config: ICognitoUserData) {
-    super(config);
-  }
 
   private startSession(session: CognitoUserSession) {
     this.UserSession = session;

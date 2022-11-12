@@ -1,5 +1,5 @@
 import { SagaMiddleware } from 'redux-saga';
-import { call, put, takeLeading } from 'redux-saga/effects';
+import { put, takeLeading } from 'redux-saga/effects';
 import GlobalInstances from '../../app/instances';
 import DataManager from '../../app/Instances/DataManager';
 import { Actions } from '../../app/Instances/db-types';

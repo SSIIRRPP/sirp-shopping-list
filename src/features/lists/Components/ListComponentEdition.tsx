@@ -5,8 +5,6 @@ import { useAppSelector } from '../../../app/hooks';
 import { selectTheme } from '../../theme/themeSlice';
 import { useMemo, useState } from 'react';
 import ListBody from './ListBody';
-import { StateInitialState } from '../../state/stateSlice';
-import ItemComponent from './ItemComponent';
 
 export interface ListComponentProps {
   list: List;

@@ -1,4 +1,4 @@
-import { configureStore, createAction } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
 import themeReducer from '../features/theme/themeSlice';
 import authReducer from '../features/auth/authSlice';
 import listsReducer from '../features/lists/listsSlice';

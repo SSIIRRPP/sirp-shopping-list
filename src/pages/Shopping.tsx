@@ -1,7 +1,6 @@
 import { Button } from '@mui/material';
 import { useCallback, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import LoadProtection from '../Components/LoadProtection';
 import Text from '../Components/Text';

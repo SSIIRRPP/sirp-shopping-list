@@ -1,5 +1,4 @@
-import { ReactNode } from 'react';
-import { Navigate, Route, RouteProps, useLocation } from 'react-router';
+import { Navigate, useLocation } from 'react-router';
 import { useAppSelector } from '../app/hooks';
 import { selectAuthStatus } from '../features/auth/authSlice';
 

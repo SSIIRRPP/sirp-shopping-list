@@ -1,21 +1,12 @@
-import {
-  changeListItemQuantity,
-  deleteList,
-  deleteListItem,
-  List,
-  listHasError,
-} from '../listsSlice';
-import { useAppDispatch, useAppSelector } from '../../../app/hooks';
+import { deleteListItem, List } from '../listsSlice';
+import { useAppSelector } from '../../../app/hooks';
 import { selectTheme } from '../../theme/themeSlice';
-import { useCallback, useMemo, useReducer, useState } from 'react';
+import { useReducer, useState } from 'react';
 import ItemComponent from './ItemComponent';
-import './ListComponent.scss';
-import { Action, createReducer, createSlice } from '@reduxjs/toolkit';
 import { Button, Collapse } from '@mui/material';
 import Text from '../../../Components/Text';
 import ExpandIcon from '../../../Components/ExpandIcon';
-import DeletionModal from './DeletionModal';
-import { dataSyncStart } from '../../state/stateSlice';
+import './ListComponent.scss';
 
 export interface ListComponentProps {
   list: List;
@@ -61,7 +52,6 @@ const ListComponentShopping = ({ list }: ListComponentProps) => {
     initReducer
   );
   const theme = useAppSelector(selectTheme);
-  const error = useMemo(() => listHasError(list), [list]);
 
   return (
     <>
@@ -69,7 +59,10 @@ const ListComponentShopping = ({ list }: ListComponentProps) => {
         className="ListComponent shopping"
         style={{
           backgroundColor: theme.backgroundSecondary,
-          borderColor: error ? 'red' : theme.backgroundSecondary,
+          borderColor: theme.backgroundSecondary,
+          padding: items.length <= 0 ? '0px' : undefined,
+          border: items.length <= 0 ? '0px' : undefined,
+          margin: items.length <= 0 ? '0px' : undefined,
         }}
       >
         {items.map((item) => (
@@ -86,7 +79,7 @@ const ListComponentShopping = ({ list }: ListComponentProps) => {
         className="ListComponent__completed"
         style={{
           backgroundColor: theme.backgroundSecondary,
-          borderColor: error ? 'red' : theme.backgroundSecondary,
+          borderColor: theme.backgroundSecondary,
         }}
       >
         <Button

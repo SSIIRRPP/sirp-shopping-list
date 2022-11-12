@@ -1,5 +1,5 @@
 import { AttributeValue } from '@aws-sdk/client-dynamodb';
-import { unmarshall as unm, convertToAttr } from '@aws-sdk/util-dynamodb';
+import { unmarshall as unm } from '@aws-sdk/util-dynamodb';
 import deepEqual from 'deep-equal';
 import { SagaMiddleware } from 'redux-saga';
 import { put, takeLeading } from 'redux-saga/effects';

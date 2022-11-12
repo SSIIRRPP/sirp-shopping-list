@@ -1,5 +1,5 @@
 import { createTheme, ThemeProvider } from '@mui/material';
-import { useMemo, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useAppSelector } from '../../app/hooks';
 import { selectTheme, selectThemeName } from './themeSlice';
 

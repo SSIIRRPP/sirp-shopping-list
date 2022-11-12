@@ -2,7 +2,6 @@ import { AttributeValue } from '@aws-sdk/client-dynamodb';
 import GlobalInstances from '../../instances';
 import { RootState } from '../../store';
 import {
-  Actions,
   IQueryCommand,
   IQueryCommandData,
   IQueryResponse,

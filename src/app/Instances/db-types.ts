@@ -82,13 +82,6 @@ export type IPutResponse =
   | PutItemCommandOutput
   | undefined;
 
-/* export interface IUpdateCommandData {
-  key: DynamoValue;
-  expression?: string;
-  names?: DynamoValue<string>;
-  values?: DynamoValue;
-} */
-
 export type IUpdateCommandData = Omit<UpdateItemCommandInput, 'TableName'>;
 
 interface UpdateCommandSimple extends Command {
@@ -153,13 +146,6 @@ export type CommandTypes =
   | IDeleteCommand
   | IQueryCommand
   | IScanCommand;
-
-export interface IResponse {
-  status: 'OK' | 'FAIL' | 'PENDING';
-  data: any;
-  code?: number;
-  middlewares?: Middlewares['post'];
-}
 
 export type ResponseTypes =
   | BatchGetItemCommandOutput

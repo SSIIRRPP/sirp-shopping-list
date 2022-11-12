@@ -1,7 +1,7 @@
 import {
   AuthenticationDetails,
-  CognitoUserAttribute,
   CognitoUserPool,
+  CookieStorage,
   ICookieStorageData,
 } from 'amazon-cognito-identity-js';
 import { SagaMiddleware } from 'redux-saga';
@@ -25,12 +25,7 @@ const CookieStorageConfig: ICookieStorageData = {
   expires: 30,
 };
 
-const Storage =
-  /* Storage: new CookieStorage(CookieStorageConfig), */ undefined;
-
-interface UserAttributes {
-  [key: string]: typeof CognitoUserAttribute;
-}
+const Storage = new CookieStorage(CookieStorageConfig);
 
 export interface IAuthManager {
   start(): void;

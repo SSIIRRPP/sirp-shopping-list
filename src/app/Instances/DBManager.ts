@@ -22,7 +22,6 @@ import {
   IPutCommand,
   IUpdateCommand,
   IUpdateCommandData,
-  IResponse,
   IDeleteCommand,
   IQueryCommand,
   IScanCommand,
@@ -35,25 +34,6 @@ import {
   CommandTypes,
 } from './db-types';
 import Manager from './Manager';
-
-export class Response<T = unknown> implements IResponse {
-  status: IResponse['status'] = 'PENDING';
-  data: T | null = null;
-
-  constructor() {}
-
-  success(res: T) {
-    this.status = 'OK';
-    this.data = res;
-    return res;
-  }
-
-  fail(err: T) {
-    this.status = 'FAIL';
-    this.data = err;
-    return err;
-  }
-}
 
 export interface IDBManager {
   sendDynamoRequest(command: IGetCommand): Promise<IGetResponse>;
