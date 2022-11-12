@@ -18,7 +18,7 @@ const ListHeader = ({ list, openBody, setOpenBody }: ListHeaderProps) => {
   const dispatch = useAppDispatch();
   const handleDeleteList = useCallback(
     () => dispatch(deleteList({ listId: list.id })),
-    [dispatch]
+    [dispatch, list.id]
   );
 
   return (

@@ -39,14 +39,14 @@ const ItemComponent = ({ item, list, mode, dispatch }: ItemComponentProps) => {
           changeListItemName({ itemId: item.id, listId: list.id, value })
         );
     },
-    [dispatch, item.id, list]
+    [dispatch, item.id, list.id]
   );
 
   const handleDeleteListItem = useCallback(
     () =>
       dispatch &&
       dispatch(deleteListItem({ listId: list.id, itemId: item.id })),
-    [list.id, item.id]
+    [dispatch, list.id, item.id]
   );
 
   return (

@@ -29,6 +29,7 @@ const Main = () => {
 
   const notModified = useMemo(
     () => !!instances.executeInstanceMethod('lists', 'checkEquality'),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [lists, stateStatus]
   );
 

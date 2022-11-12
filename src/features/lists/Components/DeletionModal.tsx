@@ -19,15 +19,14 @@ const DeletionModal = ({
 }: DeletionModalProps) => {
   const theme = useAppSelector(selectTheme);
 
-  const listenEnterKeyDown = useCallback(function (
-    this: Document,
-    ev: KeyboardEvent
-  ) {
-    if (ev.key === 'Enter') {
-      deleteFunc();
-    }
-  },
-  []);
+  const listenEnterKeyDown = useCallback(
+    function (this: Document, ev: KeyboardEvent) {
+      if (ev.key === 'Enter') {
+        deleteFunc();
+      }
+    },
+    [deleteFunc]
+  );
 
   useEffect(() => {
     if (open) {

@@ -9,7 +9,10 @@ const ThemeToggle = () => {
   const name = useAppSelector(selectThemeName);
   const dispatch = useAppDispatch();
 
-  const handleToggleTheme = useCallback(() => dispatch(toggleTheme()), []);
+  const handleToggleTheme = useCallback(
+    () => dispatch(toggleTheme()),
+    [dispatch]
+  );
 
   return (
     <div

@@ -24,12 +24,12 @@ const ListBody = ({ list, openBody, mode }: ListBodyProps) => {
   );
   const addProduct = useCallback(
     () => dispatch(createListItem({ listId: list.id })),
-    [list.id]
+    [dispatch, list.id]
   );
 
   const activateShoppinMode = useCallback(
     () => navigate(`/shopping/${list.id}`),
-    [list.id]
+    [navigate, list.id]
   );
 
   return (

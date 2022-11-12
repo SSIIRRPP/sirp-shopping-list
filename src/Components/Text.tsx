@@ -24,7 +24,7 @@ const Text = (props: TextProps) => {
       return { ...color, ...props.sx, fontSize: '1.15rem' };
     }
     return { ...color };
-  }, [props.sx, storeTheme]);
+  }, [props.sx, props.colorVariant, storeTheme]);
 
   return (
     <Typography

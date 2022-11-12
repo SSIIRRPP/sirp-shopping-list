@@ -28,7 +28,7 @@ const Shopping = () => {
   const listsStatus = useAppSelector(selectListsStatus);
   const listsError = useAppSelector(selectListsError);
 
-  const returnToMain = useCallback(() => navigate('/'), []);
+  const returnToMain = useCallback(() => navigate('/'), [navigate]);
 
   const handleDeleteList = useCallback(() => {
     if (list) {

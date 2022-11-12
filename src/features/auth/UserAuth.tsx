@@ -17,7 +17,7 @@ const UserAuth = () => {
       e.preventDefault();
       dispatch(startLogin({ password }));
     },
-    [password]
+    [password, dispatch]
   );
 
   return (

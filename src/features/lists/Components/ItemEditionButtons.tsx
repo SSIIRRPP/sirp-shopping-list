@@ -38,7 +38,7 @@ const ItemEditionButtons = ({
           );
       }
     },
-    [item, list.id, setOpenModal]
+    [dispatch, item, list.id, setOpenModal]
   );
 
   return (
