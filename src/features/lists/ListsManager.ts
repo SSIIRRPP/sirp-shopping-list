@@ -10,6 +10,7 @@ import {
   getListsFailed,
   getListsSuccess,
   List,
+  listHasError,
   selectLists,
 } from './listsSlice';
 
@@ -29,7 +30,15 @@ const actions: Actions = {
   },
 };
 
-class ListsManager extends DataManager<List> {
+function dataVerifier(lists: List[]): List[] {
+  return lists.filter((list) => !listHasError(list));
+}
+
+function itemKeyBuilder(list: List) {
+  return { id: list.id };
+}
+
+class ListsManager extends DataManager<List, List['id']> {
   constructor(config: ListsManagerConfig) {
     super({
       table: listsDbTable,
@@ -37,10 +46,12 @@ class ListsManager extends DataManager<List> {
       instances: config.instances,
       sagaMiddleware: config.sagaMiddleware,
       selector: selectLists,
+      dataVerifier,
+      itemKeyBuilder,
       query: 'scan',
       actions,
     });
-    this.registerListeners([this.listenGetLists(), this.listenDbInitialized()]);
+    this.registerListeners(this.listenGetLists(), this.listenDbInitialized());
   }
 
   *listenDbInitialized() {

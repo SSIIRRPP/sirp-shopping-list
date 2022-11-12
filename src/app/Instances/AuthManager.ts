@@ -13,6 +13,7 @@ import {
   startLogin,
   startLogout,
   User,
+  logout,
 } from '../../features/auth/authSlice';
 import GlobalInstances, { SagasList } from '../instances';
 import Manager from './Manager';
@@ -58,7 +59,7 @@ class AuthManager extends Manager implements IAuthManager {
       ClientId,
       Storage,
     });
-    this.registerListeners([this.listenStartLogin(), this.listenLogout()]);
+    this.registerListeners(this.listenStartLogin(), this.listenLogout());
   }
 
   static getInstance(config: AuthManagerConfig) {
@@ -135,10 +136,15 @@ class AuthManager extends Manager implements IAuthManager {
       yield call(AuthManager._instance.loginError, { error });
     }
   }
-  private *startLogout() {}
+  private *startLogout() {
+    yield call([
+      AuthManager._instance.User,
+      AuthManager._instance.User!.signOut,
+    ]);
+    yield put(logout());
+  }
 
   private *loginSuccess(attributes: User) {
-    console.log('loginSuccess');
     yield put(login(attributes));
   }
 

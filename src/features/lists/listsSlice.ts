@@ -1,13 +1,13 @@
 import { createAction, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
-import { Item } from '../items/itemsSlice';
 import { v4 as uuid } from 'uuid';
 import { FetchError, FetchStatus } from '../../types';
+import { Item } from './Components/ItemComponent';
 
 export interface List {
   id: string;
   name: string;
-  items: { [id: Item['id']]: number };
+  items: Item[];
 }
 
 interface ListsInitialState {
@@ -20,6 +20,21 @@ const listsInitialState: ListsInitialState = {
   lists: [],
   status: 'init',
   error: null,
+};
+
+const findList = (state: RootState['lists'], listId: List['id']) => {
+  const listIndex = state.lists.findIndex((list) => list.id === listId);
+  return state.lists[listIndex];
+};
+
+const findListItem = (
+  state: RootState['lists'],
+  listId: List['id'],
+  itemId: Item['id']
+) => {
+  const list = findList(state, listId);
+  const itemIndex = list.items.findIndex((item) => item.id === itemId);
+  return list.items[itemIndex];
 };
 
 const listsSlice = createSlice({
@@ -41,19 +56,75 @@ const listsSlice = createSlice({
       const newList = {
         id: uuid(),
         name: '',
-        items: {},
+        items: [],
       };
       state.lists = [...state.lists, newList];
+    },
+    deleteList: (state, action: PayloadAction<{ listId: string }>) => {
+      state.lists = state.lists.filter(
+        (list) => list.id !== action.payload.listId
+      );
     },
     changeListName: (
       state,
       action: PayloadAction<{ id: List['id']; value: List['name'] }>
     ) => {
       const { id, value } = action.payload;
-      const index = state.lists.findIndex((list) => list.id === id);
-      if (index >= 0) {
-        state.lists[index].name = value;
+      const list = findList(state, id);
+      list.name = value;
+    },
+    changeListItemName: (
+      state,
+      action: PayloadAction<{
+        listId: List['id'];
+        itemId: Item['id'];
+        value: Item['name'];
+      }>
+    ) => {
+      const { listId, itemId, value } = action.payload;
+      const item = findListItem(state, listId, itemId);
+      item.name = value;
+    },
+    changeListItemQuantity: (
+      state,
+      action: PayloadAction<{
+        listId: List['id'];
+        itemId: Item['id'];
+        value: 1 | -1;
+      }>
+    ) => {
+      const { listId, itemId, value } = action.payload;
+      const item = findListItem(state, listId, itemId);
+      const newValue = item.quantity + value;
+      if (newValue > 0) {
+        item.quantity = newValue;
       }
+    },
+    createListItem: (
+      state,
+      action: PayloadAction<{
+        listId: List['id'];
+      }>
+    ) => {
+      const { listId } = action.payload;
+      const newItem = {
+        id: uuid(),
+        name: '',
+        quantity: 1,
+      };
+      const list = findList(state, listId);
+      list.items.push(newItem);
+    },
+    deleteListItem: (
+      state,
+      action: PayloadAction<{
+        listId: List['id'];
+        itemId: Item['id'];
+      }>
+    ) => {
+      const { listId, itemId } = action.payload;
+      const list = findList(state, listId);
+      list.items = list.items.filter((item) => item.id !== itemId);
     },
   },
 });
@@ -63,11 +134,30 @@ export const {
   getListsFailed,
   getListsSuccess,
   createList,
+  deleteList,
   changeListName,
+  changeListItemName,
+  changeListItemQuantity,
+  createListItem,
+  deleteListItem,
 } = listsSlice.actions;
 
 export const selectLists = (state: RootState) => state.lists.lists;
+export const selectList = (state: RootState, listId: List['id']) =>
+  state.lists.lists.find((list) => list.id === listId);
 export const selectListsStatus = (state: RootState) => state.lists.status;
 export const selectListsError = (state: RootState) => state.lists.error;
+
+export const listItemHasError = (item: Item) => {
+  return item.name.length <= 0 || item.quantity <= 0;
+};
+
+export const listHasError = (list: List): boolean => {
+  return (
+    list.name.length <= 0 ||
+    list.items.length <= 0 ||
+    list.items.some(listItemHasError)
+  );
+};
 
 export default listsSlice.reducer;

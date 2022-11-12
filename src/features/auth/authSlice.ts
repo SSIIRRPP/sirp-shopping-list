@@ -35,6 +35,9 @@ export const authSlice = createSlice({
       state.status = 'logging';
       state.error = null;
     },
+    startLogout: (state) => {
+      state.status = 'logging';
+    },
     userAuthError: (state, action: PayloadAction<{ error: any }>) => {
       state.status = 'unlogged';
       state.error = action.payload.error;
@@ -42,9 +45,8 @@ export const authSlice = createSlice({
   },
 });
 
-export const startLogout = createAction('auth/startLogout');
-
-export const { login, logout, startLogin, userAuthError } = authSlice.actions;
+export const { login, logout, startLogin, startLogout, userAuthError } =
+  authSlice.actions;
 
 export const selectAuthStatus = (state: RootState) => state.auth.status;
 export const selectAuthInfo = (state: RootState) => state.auth.info;

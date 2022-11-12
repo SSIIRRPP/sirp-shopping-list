@@ -1,43 +1,56 @@
-import { unmarshall as unm, marshall as msh } from '@aws-sdk/util-dynamodb';
-import { Action } from '@reduxjs/toolkit';
+import { AttributeValue } from '@aws-sdk/client-dynamodb';
+import { unmarshall as unm, convertToAttr } from '@aws-sdk/util-dynamodb';
 import deepEqual from 'deep-equal';
 import { SagaMiddleware } from 'redux-saga';
-import { put } from 'redux-saga/effects';
+import { put, takeLeading } from 'redux-saga/effects';
 import { AppSelector } from '../hooks';
 import GlobalInstances from '../instances';
 import { RootState } from '../store';
-import { FullQueryLoader } from './db-helpers';
-import { Actions, ActionValues } from './db-types';
+import FullQueryLoader from './db-helpers/FullQueryLoader';
+import WriteCommandsBuilder from './db-helpers/WriteCommandsBuilder';
+import UpdateComparer from './db-helpers/UpdateComparer';
+import { Actions, ActionValues, DataVerificationFunction } from './db-types';
 import Manager from './Manager';
+import { dataSyncSuccess } from '../../features/state/stateSlice';
 
-export interface DataManagerConfig {
+export interface DataManagerConfig<T> {
   query?: 'query' | 'scan';
   table: string;
   name: keyof RootState;
-  selector: AppSelector;
+  selector: AppSelector<T>;
+  dataVerifier: DataVerificationFunction<T>;
+  itemKeyBuilder: (item: T) => { [k: string]: string };
   instances: GlobalInstances;
   sagaMiddleware: SagaMiddleware;
   actions: Actions;
 }
 
-class DataManager<T extends { id: string }> extends Manager {
+class DataManager<
+  T extends { [key: string]: any },
+  P extends string | number | symbol
+> extends Manager {
   private table: string;
   protected name: keyof RootState;
   protected globalInstances: GlobalInstances;
   protected actions: Actions;
-  private fetched: Record<string, T> | null = null;
-  private fetchedKeys: Array<string> | null = null;
+  private fetched: Record<P, T> = {} as Record<P, T>;
+  private fetchedKeys: Set<P> = new Set();
   private selector: AppSelector;
+  private itemKeyBuilder: (item: T) => { [k: string]: string };
+  private dataVerifier: DataVerificationFunction<T>;
   private query: null | 'query' | 'scan' = null;
 
-  constructor(config: DataManagerConfig) {
+  constructor(config: DataManagerConfig<T>) {
     super(config.sagaMiddleware);
     this.globalInstances = config.instances;
     this.table = config.table;
     this.name = config.name;
     this.actions = config.actions;
     this.selector = config.selector;
+    this.dataVerifier = config.dataVerifier;
+    this.itemKeyBuilder = config.itemKeyBuilder;
     this.query = config.query ?? null;
+    this.registerListeners(this.listenSyncDataSuccess());
   }
 
   private sendActionsToChannel(actions?: ActionValues, payload?: any) {
@@ -50,12 +63,11 @@ class DataManager<T extends { id: string }> extends Manager {
       });
   }
 
-  private queryRequest(): Promise<Array<unknown>> {
+  private queryRequest(): Promise<Array<T>> {
     const queryHelper = new FullQueryLoader<T>({
       type: this.query!,
       table: this.table,
       name: this.name,
-      actions: this.actions,
       instances: this.globalInstances,
     });
     return queryHelper.load();
@@ -69,9 +81,9 @@ class DataManager<T extends { id: string }> extends Manager {
       let items;
       if (this.query) {
         const response = await this.queryRequest();
-        const unmarshalled = this.unmarshall(response as any);
-        this.addFetched(unmarshalled as any);
-        this.addFetchedKeys(unmarshalled.map((i: any) => i.id));
+        const unmarshalled = this.unmarshall(response);
+        this.addFetched(unmarshalled);
+        this.addFetchedKeys(unmarshalled.map((i) => i.id));
         items = unmarshalled;
       } else {
       }
@@ -81,34 +93,89 @@ class DataManager<T extends { id: string }> extends Manager {
     }
   }
 
-  async update() {}
+  update() {
+    const selection = this.selectFromStore<T>(this.selector) || [];
+    const selectionObject = Object.fromEntries(
+      selection.map((item) => [item.id, item])
+    );
 
-  private unmarshall(items: {} | {}[]) {
+    const comparer = new UpdateComparer<T, P>({
+      newItems: selectionObject,
+      oldItems: this.fetched ?? {},
+    });
+    const comparison = comparer.compare();
+    const { put, update, delete: deleted } = comparison;
+
+    const commands = new WriteCommandsBuilder<T>({
+      put: Array.from(put).map((id) => selectionObject[id]),
+      delete: Array.from(deleted).map((id) => this.fetched[id]),
+      update: Array.from(update).map((id) => selectionObject[id]),
+      table: this.table,
+      dataVerifier: this.dataVerifier,
+      itemKeyBuilder: this.itemKeyBuilder,
+    }).build();
+
+    return Object.values(commands)
+      .map((commandsArray) =>
+        commandsArray.map((command) =>
+          this.globalInstances.executeInstanceMethod(
+            'db',
+            'sendDynamoRequest',
+            [command]
+          )
+        )
+      )
+      .flat();
+  }
+
+  adoptStoreItems() {
+    const selection = this.selectFromStore<T>(this.selector) || [];
+    const selectionObject = Object.fromEntries(
+      selection.map((item) => [item.id, item])
+    );
+    this.fetched = selectionObject;
+  }
+
+  private unmarshall(items: Record<string, AttributeValue>): T;
+  private unmarshall(items: Record<string, AttributeValue>[]): T[];
+  private unmarshall(
+    items: Record<string, AttributeValue> | Record<string, AttributeValue>[]
+  ) {
     if (Array.isArray(items)) {
-      return items.map((i) => unm(i));
+      const a = items.map((i) => unm(i) as T);
+      return a;
     } else {
-      return unm(items);
+      return unm(items) as T;
     }
   }
 
-  private marshall(items: {} | {}[]) {
+  private addFetched(items: T | T[]) {
+    let newFetched: Record<P, T>;
     if (Array.isArray(items)) {
-      return items.map((i) => msh(i));
+      newFetched = Object.fromEntries(
+        items.map((item) => [item.id as P, item])
+      ) as Record<P, T>;
     } else {
-      return msh(items);
+      newFetched = { [items.id]: items } as Record<P, T>;
     }
+    this.fetched = {
+      ...this.fetched,
+      ...newFetched,
+    };
   }
 
-  private addFetched(items: T[]) {
-    this.fetched = Object.fromEntries(items.map((item: T) => [item.id, item]));
+  private addFetchedKeys(keys: P | Array<P>) {
+    let newKeys = new Set<P>();
+    if (Array.isArray(keys)) {
+    } else {
+    }
+    newKeys.forEach((key) => {
+      this.fetchedKeys.add(key);
+    });
   }
 
-  private addFetchedKeys(keys: string[]) {
-    this.fetchedKeys = keys;
-  }
-
-  private checkItemEquality(itemId: string, item: T): boolean {
-    return deepEqual(this.fetched?.[itemId], item);
+  *listenSyncDataSuccess() {
+    yield takeLeading(dataSyncSuccess.type, this.adoptStoreItems.bind(this));
   }
 
   checkEquality() {

@@ -10,6 +10,13 @@
     align-items: center;
   }
   &__body {
+    &--noLists {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
     padding: 1rem;
+    overflow: hidden scroll;
   }
 }

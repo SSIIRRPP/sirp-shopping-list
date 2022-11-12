@@ -25,10 +25,6 @@ const Theme = ({ children }: ThemeProps) => {
     return _theme;
   }, [storeTheme, themeName]);
 
-  /* useEffect(() => {
-    console.log('theme: ', theme, themeName, storeTheme);
-  }, [theme, storeTheme, themeName]); */
-
   return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
 };
 

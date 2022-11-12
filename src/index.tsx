@@ -7,22 +7,21 @@ import App from './App';
 import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import Theme from './features/theme/Theme';
+import { SnackbarProvider } from 'notistack';
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
 
-export const SagasContext = React.createContext(instances);
-
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <SagasContext.Provider value={instances}>
-        <Theme>
-          <BrowserRouter>
+      <Theme>
+        <BrowserRouter>
+          <SnackbarProvider>
             <App />
-          </BrowserRouter>
-        </Theme>
-      </SagasContext.Provider>
+          </SnackbarProvider>
+        </BrowserRouter>
+      </Theme>
     </Provider>
   </React.StrictMode>
 );

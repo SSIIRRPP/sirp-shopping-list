@@ -2,5 +2,8 @@
   height: 100vh;
   display: grid;
   grid-template-columns: 100vw;
-  grid-template-rows: 60px 1fr;
+  grid-template-rows: 60px calc(100vh - 60px);
+  & * {
+    font-size: 24px;
+  }
 }

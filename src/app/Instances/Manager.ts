@@ -25,20 +25,20 @@ class Manager {
     return take(this.eventChannel);
   }
 
-  protected registerListeners(listeners: SagasList) {
-    listeners.forEach((listener) => this.listeners.push(listener));
+  protected registerListeners(...args: SagasList) {
+    args.forEach((listener) => this.listeners.push(listener));
   }
 
   protected runSaga(saga: Saga, args?: unknown[]) {
     return this.sagaMiddleware.run(saga, args);
   }
 
-  protected selectFromStore(selector: any, args?: unknown[]) {
+  protected selectFromStore<T = unknown>(selector: any, args?: unknown[]) {
     function* selectionSaga(): any {
-      const selection: any = yield select(selector, args);
+      const selection: T[] = yield select(selector, args) || [];
       return selection;
     }
-    return this.runSaga(selectionSaga).result();
+    return this.runSaga(selectionSaga).result<T[]>();
   }
 
   getListeners() {

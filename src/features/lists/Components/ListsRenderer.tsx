@@ -1,11 +1,12 @@
 import { useAppSelector } from '../../../app/hooks';
 import LoadProtection from '../../../Components/LoadProtection';
-import ListComponent from './ListComponent';
+import ListComponentEdition from './ListComponentEdition';
 import {
   selectLists,
   selectListsError,
   selectListsStatus,
 } from '../listsSlice';
+import Text from '../../../Components/Text';
 
 const ListsRenderer = () => {
   const lists = useAppSelector(selectLists);
@@ -18,11 +19,18 @@ const ListsRenderer = () => {
     >
       <>
         {lists.map((list) => (
-          <ListComponent
+          <ListComponentEdition
             key={list.id}
             list={list}
           />
         ))}
+        {lists.length === 0 ? (
+          <div className="Main__body--noLists">
+            <Text sx={{ fontSize: '1.5rem', marginBottom: '4rem' }}>
+              Crea una lista
+            </Text>
+          </div>
+        ) : null}
       </>
     </LoadProtection>
   );

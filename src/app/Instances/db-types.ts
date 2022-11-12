@@ -7,6 +7,7 @@ import {
   PutItemCommandOutput,
   QueryCommandInput,
   QueryCommandOutput,
+  ReturnConsumedCapacity,
   ScanCommandInput,
   ScanCommandOutput,
   UpdateItemCommandInput,
@@ -14,7 +15,9 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import { AnyAction } from '@reduxjs/toolkit';
 
-type DynamoValue<T = AttributeValue> = Record<string, T>;
+export type DynamoValue<T = AttributeValue> = Record<string, T>;
+
+export type DataVerificationFunction<T = any> = (i: T[]) => T[];
 
 export interface Middlewares {
   prev?: (() => any)[];
@@ -37,8 +40,8 @@ export interface Actions {
 export interface Command {
   type: 'put' | 'get' | 'update' | 'delete' | 'query' | 'scan';
   batch: boolean;
-  actions: Actions;
   data: any;
+  returnCapacity?: ReturnConsumedCapacity;
   middlewares?: Middlewares;
   table: string;
 }
@@ -157,3 +160,13 @@ export interface IResponse {
   code?: number;
   middlewares?: Middlewares['post'];
 }
+
+export type ResponseTypes =
+  | BatchGetItemCommandOutput
+  | BatchWriteItemCommandOutput
+  | DeleteItemCommandOutput
+  | GetItemCommandOutput
+  | PutItemCommandOutput
+  | QueryCommandOutput
+  | ScanCommandOutput
+  | UpdateItemCommandOutput;

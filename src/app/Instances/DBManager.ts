@@ -15,9 +15,7 @@ import { createAction } from '@reduxjs/toolkit';
 import { SagaMiddleware } from 'redux-saga';
 import { put, takeLeading } from 'redux-saga/effects';
 import { identityPoolId, region, userPoolId } from '../../constants';
-import { login } from '../../features/auth/authSlice';
-import { getItems } from '../../features/items/itemsSlice';
-import { getLists } from '../../features/lists/listsSlice';
+import { login, logout } from '../../features/auth/authSlice';
 import GlobalInstances, { SagasList } from '../instances';
 import {
   IGetCommand,
@@ -82,7 +80,7 @@ class DBManager extends Manager implements IDBManager {
   private constructor(config: DBManagerConfig) {
     super(config.sagaMiddleware);
     this.globalInstances = config.instances;
-    this.registerListeners([this.listenLogin()]);
+    this.registerListeners(this.listenLogin());
   }
 
   static getInstance(config: DBManagerConfig) {
@@ -128,22 +126,28 @@ class DBManager extends Manager implements IDBManager {
     }
   }
 
+  private destroyDynamoInstance() {
+    DBManager._instance.dynamo = null;
+  }
+
   private get(command: IGetCommand) {
     return new Promise<IGetResponse>(async (resolve) => {
       let response;
       if (DBManager._instance.dynamo) {
         let dbCommand;
-        const { table } = command;
+        const { table, returnCapacity } = command;
         if (command.batch) {
           const { data } = command;
           dbCommand = new BatchGetItemCommand({
             RequestItems: { [table]: { Keys: data } },
+            ReturnConsumedCapacity: returnCapacity,
           });
           response = await DBManager._instance.dynamo.send(dbCommand);
         } else {
           const { data } = command;
           dbCommand = new GetItemCommand({
             TableName: table,
+            ReturnConsumedCapacity: returnCapacity,
             Key: data,
           });
           response = await DBManager._instance.dynamo.send(dbCommand);
@@ -158,16 +162,21 @@ class DBManager extends Manager implements IDBManager {
       let response;
       if (DBManager._instance.dynamo) {
         let dbCommand;
-        const { table } = command;
+        const { table, returnCapacity } = command;
         if (command.batch) {
           const { data } = command;
           dbCommand = new BatchWriteItemCommand({
             RequestItems: { [table]: data },
+            ReturnConsumedCapacity: returnCapacity,
           });
           response = await DBManager._instance.dynamo.send(dbCommand);
         } else {
           const { data } = command;
-          dbCommand = new PutItemCommand({ TableName: table, Item: data });
+          dbCommand = new PutItemCommand({
+            TableName: table,
+            Item: data,
+            ReturnConsumedCapacity: returnCapacity,
+          });
           response = await DBManager._instance.dynamo.send(dbCommand);
         }
       }
@@ -179,9 +188,13 @@ class DBManager extends Manager implements IDBManager {
     return new Promise<IUpdateResponse>(async (resolve) => {
       let response;
       if (DBManager._instance.dynamo) {
-        const { table } = command;
+        const { table, returnCapacity } = command;
         const createDbCommand = (data: IUpdateCommandData) =>
-          new UpdateItemCommand({ TableName: table, ...data });
+          new UpdateItemCommand({
+            TableName: table,
+            ReturnConsumedCapacity: returnCapacity,
+            ...data,
+          });
         if (command.batch) {
           const { data } = command;
           response = await Promise.all(
@@ -204,11 +217,12 @@ class DBManager extends Manager implements IDBManager {
     return new Promise<IDeleteResponse>(async (resolve) => {
       let response;
       if (DBManager._instance.dynamo) {
-        const { table } = command;
+        const { table, returnCapacity } = command;
         if (command.batch) {
           const { data } = command;
           const dbCommand = new BatchWriteItemCommand({
             RequestItems: { [table]: data },
+            ReturnConsumedCapacity: returnCapacity,
           });
           response = await DBManager._instance.dynamo.send(dbCommand);
         } else {
@@ -216,6 +230,7 @@ class DBManager extends Manager implements IDBManager {
           const dbCommand = new DeleteItemCommand({
             TableName: table,
             Key: data,
+            ReturnConsumedCapacity: returnCapacity,
           });
           response = await DBManager._instance.dynamo.send(dbCommand);
         }
@@ -228,9 +243,10 @@ class DBManager extends Manager implements IDBManager {
     return new Promise<IQueryResponse>(async (resolve) => {
       let response;
       if (DBManager._instance.dynamo) {
-        const { table, data } = command;
+        const { table, data, returnCapacity } = command;
         const dbCommand = new QueryCommand({
           TableName: table,
+          ReturnConsumedCapacity: returnCapacity,
           ...data,
         });
         response = await DBManager._instance.dynamo.send(dbCommand);
@@ -243,8 +259,12 @@ class DBManager extends Manager implements IDBManager {
     return new Promise<IScanResponse>(async (resolve) => {
       let response;
       if (DBManager._instance.dynamo) {
-        const { table, data } = command;
-        const dbCommand = new ScanCommand({ TableName: table, ...data });
+        const { table, data, returnCapacity } = command;
+        const dbCommand = new ScanCommand({
+          TableName: table,
+          ReturnConsumedCapacity: returnCapacity,
+          ...data,
+        });
         response = await DBManager._instance.dynamo.send(dbCommand);
       }
       resolve(response);
@@ -293,6 +313,10 @@ class DBManager extends Manager implements IDBManager {
 
   *listenLogin() {
     yield takeLeading(login.type, DBManager._instance.createDynamoInstance);
+  }
+
+  *listenLogout() {
+    yield takeLeading(logout.type, DBManager._instance.destroyDynamoInstance);
   }
 }
 

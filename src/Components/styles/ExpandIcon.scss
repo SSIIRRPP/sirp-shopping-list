@@ -1,3 +1,5 @@
+$icon-size: 30px;
+
 .ExpandIcon {
   &.open {
     transform: rotate(-180deg);
@@ -6,4 +8,6 @@
     animation-name: closed-expand-icon;
   }
   transition: transform 0.4s ease-in-out;
+  width: $icon-size;
+  height: $icon-size;
 }

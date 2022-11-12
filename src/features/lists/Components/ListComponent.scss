@@ -1,10 +1,69 @@
 .ListComponent {
+  &.shopping {
+    padding-top: 0.5rem;
+  }
   border-radius: 0.4rem;
+  border: 2px solid;
   margin-bottom: 1rem;
   &__header {
+    &--open {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    & > button {
+      margin: 0 0 0 1rem;
+    }
     padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: 1fr;
+  }
+  &__body {
+    &--header {
+      padding: 0.5rem 0;
+      & > * {
+        &:first-child {
+          grid-area: name;
+        }
+        margin: 0.5rem !important;
+      }
+
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      grid-template-areas: 'name name' 'buy add';
+    }
+    &--body {
+      padding: 0.5rem;
+      & > h6 {
+        text-align: center;
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
+  &__completed {
+    & > button {
+      &:disabled {
+        opacity: 0.6;
+      }
+      & > p {
+        font-size: 1.25rem !important;
+      }
+      & > svg {
+        margin-left: 0.5rem;
+      }
+      width: 100%;
+    }
+    border-radius: 0.4rem;
+    border: 2px solid;
+    padding: 0.5rem 0;
+  }
+  &__complete {
+    width: 100%;
+    margin-bottom: 0.5rem !important;
+    & > p {
+      font-size: 1.25rem !important;
+    }
   }
 }

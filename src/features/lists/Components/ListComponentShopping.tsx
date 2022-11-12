@@ -1,0 +1,117 @@
+import {
+  changeListItemQuantity,
+  deleteList,
+  deleteListItem,
+  List,
+  listHasError,
+} from '../listsSlice';
+import { useAppDispatch, useAppSelector } from '../../../app/hooks';
+import { selectTheme } from '../../theme/themeSlice';
+import { useCallback, useMemo, useReducer, useState } from 'react';
+import ItemComponent from './ItemComponent';
+import './ListComponent.scss';
+import { Action, createReducer, createSlice } from '@reduxjs/toolkit';
+import { Button, Collapse } from '@mui/material';
+import Text from '../../../Components/Text';
+import ExpandIcon from '../../../Components/ExpandIcon';
+import DeletionModal from './DeletionModal';
+import { dataSyncStart } from '../../state/stateSlice';
+
+export interface ListComponentProps {
+  list: List;
+}
+
+interface ListState {
+  items: List['items'];
+  completed: List['items'];
+}
+
+const reducer = (
+  state: ListState,
+  action: { type: string; payload: any }
+): ListState => {
+  switch (action.type) {
+    case deleteListItem.type: {
+      const { itemId }: { listId: string; itemId: string } = action.payload;
+      const item = state.items.find((item) => item.id === itemId);
+      if (item) {
+        return {
+          items: state.items.filter((item) => item.id !== itemId),
+          completed: [...state.completed, item],
+        };
+      } else {
+        return state;
+      }
+    }
+    default:
+      return state;
+  }
+};
+
+const initReducer = (list: List) => ({
+  items: list.items,
+  completed: [],
+});
+
+const ListComponentShopping = ({ list }: ListComponentProps) => {
+  const [openCompleted, setOpenCompleted] = useState(false);
+  const [{ items, completed }, dispatcher] = useReducer(
+    reducer,
+    list,
+    initReducer
+  );
+  const theme = useAppSelector(selectTheme);
+  const error = useMemo(() => listHasError(list), [list]);
+
+  return (
+    <>
+      <div
+        className="ListComponent shopping"
+        style={{
+          backgroundColor: theme.backgroundSecondary,
+          borderColor: error ? 'red' : theme.backgroundSecondary,
+        }}
+      >
+        {items.map((item) => (
+          <ItemComponent
+            key={item.id}
+            dispatch={dispatcher}
+            mode="shopping"
+            list={list}
+            item={item}
+          />
+        ))}
+      </div>
+      <div
+        className="ListComponent__completed"
+        style={{
+          backgroundColor: theme.backgroundSecondary,
+          borderColor: error ? 'red' : theme.backgroundSecondary,
+        }}
+      >
+        <Button
+          disabled={completed.length <= 0}
+          onClick={() => setOpenCompleted((s) => !s)}
+          style={{
+            backgroundColor: theme.backgroundColor,
+          }}
+        >
+          <Text>Completado</Text>
+          <ExpandIcon open={openCompleted} />
+        </Button>
+        <Collapse in={openCompleted}>
+          {completed.map((item) => (
+            <ItemComponent
+              key={item.id}
+              mode="completed"
+              list={list}
+              item={item}
+            />
+          ))}
+        </Collapse>
+      </div>
+    </>
+  );
+};
+
+export default ListComponentShopping;

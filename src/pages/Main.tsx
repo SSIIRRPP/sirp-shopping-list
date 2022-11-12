@@ -1,36 +1,50 @@
 import { Button } from '@mui/material';
-import { useCallback, useContext, useMemo } from 'react';
-import { SagasContext } from '..';
+import { useCallback, useContext, useEffect, useMemo } from 'react';
+import { SagasContext } from '../App';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { dataSelector } from '../app/store';
 import ListsRenderer from '../features/lists/Components/ListsRenderer';
-import { createList } from '../features/lists/listsSlice';
+import {
+  createList,
+  listHasError,
+  selectLists,
+} from '../features/lists/listsSlice';
+import {
+  changeShoppingMode,
+  dataSyncStart,
+  selectStateStatus,
+} from '../features/state/stateSlice';
 import './styles/Main.scss';
 
 const Main = () => {
   const instances = useContext(SagasContext);
-  const data = useAppSelector(dataSelector);
+  const lists = useAppSelector(selectLists);
+  const stateStatus = useAppSelector(selectStateStatus);
   const dispatch = useAppDispatch();
 
   const addList = useCallback(() => dispatch(createList()), [dispatch]);
-  const dbSyncronization = useCallback(() => {
-    /* dispatch() */
+  const dataSyncronization = useCallback(
+    () => dispatch(dataSyncStart('manual-sync')),
+    [dispatch]
+  );
+
+  const notModified = useMemo(
+    () => !!instances.executeInstanceMethod('lists', 'checkEquality'),
+    [lists, stateStatus]
+  );
+
+  useEffect(() => {
+    dispatch(changeShoppingMode('edition'));
   }, [dispatch]);
 
-  const modified = useMemo(
-    () =>
-      !instances.executeInstanceMethod('lists', 'checkEquality') ||
-      !instances.executeInstanceMethod('items', 'checkEquality'),
-    [data]
-  );
+  const errors = useMemo(() => lists.some(listHasError), [lists]);
 
   return (
     <div className="Main">
       <div className="Main__head">
         <Button
-          onClick={() => {}}
+          onClick={dataSyncronization}
           variant="outlined"
-          disabled={!modified}
+          disabled={notModified || errors}
         >
           Sincronizar
         </Button>
