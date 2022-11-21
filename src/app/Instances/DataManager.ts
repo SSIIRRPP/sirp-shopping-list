@@ -3,7 +3,7 @@ import { unmarshall as unm } from '@aws-sdk/util-dynamodb';
 import deepEqual from 'deep-equal';
 import { SagaMiddleware } from 'redux-saga';
 import { put, takeLeading } from 'redux-saga/effects';
-import { AppSelector } from '../hooks';
+import { AppDataSelector } from '../hooks';
 import GlobalInstances from '../instances';
 import { RootState } from '../store';
 import FullQueryLoader from './db-helpers/FullQueryLoader';
@@ -17,7 +17,7 @@ export interface DataManagerConfig<T> {
   query?: 'query' | 'scan';
   table: string;
   name: keyof RootState;
-  selector: AppSelector<T>;
+  selector: AppDataSelector<T>;
   dataVerifier: DataVerificationFunction<T>;
   itemKeyBuilder: (item: T) => { [k: string]: string };
   instances: GlobalInstances;
@@ -35,7 +35,7 @@ class DataManager<
   protected actions: Actions;
   private fetched: Record<P, T> = {} as Record<P, T>;
   private fetchedKeys: Set<P> = new Set();
-  private selector: AppSelector;
+  private selector: AppDataSelector<T>;
   private itemKeyBuilder: (item: T) => { [k: string]: string };
   private dataVerifier: DataVerificationFunction<T>;
   private query: null | 'query' | 'scan' = null;
