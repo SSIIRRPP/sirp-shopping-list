@@ -73,7 +73,7 @@ const Shopping = () => {
               deleteFunc={handleDeleteList}
               message={[
                 `¿Seguro que quieres completar la compra de la lista "${list.name}"?`,
-                'Esta acción eliminará la lista',
+                'Esta acción vaciará la lista',
               ]}
             />
           </>
