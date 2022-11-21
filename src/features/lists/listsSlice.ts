@@ -65,6 +65,10 @@ const listsSlice = createSlice({
         (list) => list.id !== action.payload.listId
       );
     },
+    emptyList: (state, action: PayloadAction<{ listId: string }>) => {
+      const list = findList(state, action.payload.listId);
+      list.items = [];
+    },
     changeListName: (
       state,
       action: PayloadAction<{ id: List['id']; value: List['name'] }>
@@ -135,6 +139,7 @@ export const {
   getListsSuccess,
   createList,
   deleteList,
+  emptyList,
   changeListName,
   changeListItemName,
   changeListItemQuantity,

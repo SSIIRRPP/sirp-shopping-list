@@ -7,7 +7,7 @@ import Text from '../Components/Text';
 import DeletionModal from '../features/lists/Components/DeletionModal';
 import ListComponentShopping from '../features/lists/Components/ListComponentShopping';
 import {
-  deleteList,
+  emptyList,
   List,
   selectList,
   selectListsError,
@@ -33,7 +33,7 @@ const Shopping = () => {
   const handleDeleteList = useCallback(() => {
     if (list) {
       returnToMain();
-      dispatch(deleteList({ listId: list.id }));
+      dispatch(emptyList({ listId: list.id }));
       dispatch(dataSyncStart('completed-list'));
     }
   }, [list, dispatch, returnToMain]);
