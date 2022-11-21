@@ -113,7 +113,7 @@ const listsSlice = createSlice({
         quantity: 1,
       };
       const list = findList(state, listId);
-      list.items.push(newItem);
+      list.items.unshift(newItem);
     },
     deleteListItem: (
       state,
