@@ -153,11 +153,7 @@ export const listItemHasError = (item: Item) => {
 };
 
 export const listHasError = (list: List): boolean => {
-  return (
-    list.name.length <= 0 ||
-    list.items.length <= 0 ||
-    list.items.some(listItemHasError)
-  );
+  return list.name.length <= 0 || list.items.some(listItemHasError);
 };
 
 export default listsSlice.reducer;
