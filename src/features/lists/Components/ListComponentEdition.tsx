@@ -20,6 +20,7 @@ const ListComponentEdition = ({ list }: ListComponentProps) => {
       className="ListComponent"
       style={{
         backgroundColor: theme.backgroundSecondary,
+        border: '2px solid',
         borderColor: error ? 'red' : theme.backgroundSecondary,
       }}
     >
